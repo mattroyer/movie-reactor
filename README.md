@@ -1,4 +1,4 @@
-# Movie Recommender (TMDB Explorer)
+# Movie Reactor (TMDB Explorer)
 
 A personal movie discovery app built with Next.js App Router, React, TypeScript, and Tailwind CSS, powered by the TMDB API.
 
