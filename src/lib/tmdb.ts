@@ -1,14 +1,10 @@
 import { Movie, TMDBResponse } from '@/lib/types'
 
-// Build API base URL with a safe fallback for server-side usage.
-// Prefer `NEXT_PUBLIC_SITE_URL`. If that's not set, try Vercel's `VERCEL_URL`.
-// As a last resort (dev only), fall back to `http://localhost:3000` and warn.
 const _siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined)
 
 if (typeof window === 'undefined' && !_siteUrl) {
   if (process.env.NODE_ENV === 'production') {
-    // In production we want a hard failure so deployments don't silently misconfigure.
     throw new Error(
       'Missing required environment variable: NEXT_PUBLIC_SITE_URL. Set this to the public origin (for example https://example.com) so server-side code can call the internal API route.'
     )
