@@ -2,12 +2,16 @@
 
 import { ReactElement, cloneElement, useEffect, useState } from 'react'
 
+type IconProps = {
+  className?: string
+}
+
 type TasteButtonProps = {
   active: boolean,
   onClick: () => void
   title: string
   activeColor: 'red' | 'blue' | 'yellow'
-  icon: ReactElement
+  icon: ReactElement<IconProps>
 }
 
 const colorMap = {
