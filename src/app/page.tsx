@@ -1,65 +1,148 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect, useRef } from "react"
+import { Movie } from '@/lib/types'
+import { tmdb } from '@/lib/tmdb'
+import MovieGrid from '@/components/MovieGrid'
+
+export default function HomePage() {
+  const [movies, setMovies] = useState<Movie[]>([])
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+
+  const observerTarget = useRef<HTMLDivElement>(null)
+  const isFetchingRef = useRef(false)
+
+  const fetchMovies = async (pageNum: number) => {
+    if (isFetchingRef.current) return
+
+    try {
+      isFetchingRef.current = true
+
+      if (pageNum === 1) {
+        setLoading(true)
+      } else {
+        setLoadingMore(true)
+      }
+
+      const { results, total_pages } = await tmdb.getPopular(pageNum)
+
+      if (pageNum === 1) {
+        const filteredResults = results.filter(item => !item.adult);
+        setMovies(filteredResults)
+      } else {
+        const filteredResults = results.filter(item => !item.adult);
+        setMovies(prev => [...prev, ...filteredResults])
+      }
+
+      setHasMore(pageNum < total_pages)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+      isFetchingRef.current = false
+    }
+  }
+
+  useEffect(() => {
+    fetchMovies(page)
+  }, [page])
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          setPage(prevPage => {
+            if (!isFetchingRef.current && hasMore) {
+              return prevPage + 1
+            }
+            return prevPage
+          })
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const currentTarget = observerTarget.current
+    if (currentTarget) {
+      observer.observe(currentTarget)
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget)
+      }
+    }
+  }, [hasMore, loadingMore, loading])
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="min-h-screen bg-gray-900 text-white">
+      <header className="bg-gray-800 shadow-lg">
+        <div className="container mx-auto px-8 py-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">🎬 Movie Discovery</h1>
+            <p className="text-gray-400 mt-1">Find hidden gems you'll love</p>
+          </div>
+
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <span>Powered by</span>
+            <img
+              src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
+              alt="The Movie Database"
+              className="h-4"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        {loading && (
+          <div className="text-center py-20">
+            <div className="text-xl">Loading movies...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-900 border border-red-700 rounded-lg p-4 mb-6">
+            <p className="text-red-200">Error: {error}</p>
+            <p className="text-red-300 text-sm mt-2">
+              Make sure you've added your TMDB API key!
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && movies && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold mb-2">Popular Right Now</h2>
+              <p className="text-gray-400">
+                {movies.length} movies loaded • Page {page}
+              </p>
+            </div>
+            <MovieGrid movies={movies} />
+
+            {/* Sentinel element for infinite scroll */}
+            <div ref={observerTarget} className="h-20" />
+
+            {loadingMore && (
+              <div className="text-center py-8">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-4-transparent"></div>
+                <p className="text-gray-400 mt-2">Loading more movies...</p>
+              </div>
+            )}
+
+            {!hasMore && (
+              <p className="text-center text-gray-500 py-8">
+                No more movies to load
+              </p>
+            )}
+          </>
+        )}
       </main>
     </div>
-  );
+  )
 }

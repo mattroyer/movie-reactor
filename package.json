@@ -5,10 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:ci": "npm run verify-env && next build",
+    "netlify-build": "npm run verify-env && next build",
     "start": "next start",
+    "verify-env": "node ./scripts/verify-env.js",
     "lint": "eslint"
   },
   "dependencies": {
+    "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "react": "19.2.1",
     "react-dom": "19.2.1"
