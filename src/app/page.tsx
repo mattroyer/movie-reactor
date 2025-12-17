@@ -82,13 +82,16 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <header className="bg-gray-800 shadow-lg">
-        <div className="container mx-auto px-8 py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">🎬 Movie Discovery</h1>
-            <p className="text-gray-400 mt-1">Find hidden gems you'll love</p>
+        <div className="container mx-auto px-4 sm:px-8 py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl sm:text-3xl font-bold leading-tight flex items-center justify-center gap-2 sm:justify-start">
+              <span>🎬</span>
+              <span className="whitespace-nowrap">Movie Discovery</span>
+            </h1>
+            <p className="text-sm sm:text-lg text-gray-400 mt-1">Find hidden gems you'll love</p>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex justify-center items-center gap-2 text-xs opacity-70 sm:justify-start text-gray-400">
             <span>Powered by</span>
             <img
               src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
